@@ -20,9 +20,11 @@ export const authenticate =
     const decoded = jwt.verify(token, JWT_SECRET) as {
       userId: string;
       role?: AllowedRole;
+      branchId?: string;
     };
 
     req.userId = decoded.userId;
+    req.branchId = decoded.branchId;
 
     if (requiredRole) {
       if (!decoded.role) {

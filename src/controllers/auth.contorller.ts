@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { role: true },
+    include: { role: true, branch: true },
   });
 
   if (!user) {
@@ -80,9 +80,18 @@ export const login = async (req: Request, res: Response) => {
     throw new CustomError("Invalid credentials", 401);
   }
 
+  // Check if user's branch is active
+  if (user.branch.status === "INACTIVE") {
+    throw new CustomError(
+      "Your branch is disabled. Please contact administrator.",
+      403
+    );
+  }
+
   const token = signToken({
     userId: user.id,
     role: user.role.name,
+    branchId: user.branchId,
   });
 
   res.json({
@@ -93,6 +102,12 @@ export const login = async (req: Request, res: Response) => {
       name: user.name,
       email: user.email,
       role: user.role.name,
+      branchId: user.branchId,
+      branch: {
+        id: user.branch.id,
+        name: user.branch.name,
+        code: user.branch.code,
+      },
     },
   });
 };

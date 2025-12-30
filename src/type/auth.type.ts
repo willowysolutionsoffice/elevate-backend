@@ -4,6 +4,7 @@ import { createUserSchema } from "../validator/auth.schema";
 
 export interface AuthenticatedRequest extends Request {
   userId?: string;
+  branchId?: string;
 }
 
 export type AllowedRole = "admin" | "manager" | "site-supervisor";
