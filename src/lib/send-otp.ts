@@ -1,4 +1,4 @@
-import transporter from "./email.config";
+import transporter from "../config/email.config";
 import { otpEmailTemplate } from "../utils/otp-email-template";
 
 export const sendOTPEmail = async (to: string, otp: string) => {
