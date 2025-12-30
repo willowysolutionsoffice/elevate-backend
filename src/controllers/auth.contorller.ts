@@ -56,8 +56,6 @@ export const register = async (req: Request, res: Response) => {
   });
 };
 
-// OTP is not used for registration or login. Implement OTP only for forgot password if needed.
-
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body as {
     email?: string;
