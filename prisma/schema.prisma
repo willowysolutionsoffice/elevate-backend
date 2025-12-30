@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model TestDb {
+  id   String @id @default(uuid())
+  name String
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Role {
+  id          String  @id @default(uuid())
+  name        String  @db.VarChar(50)
+  description String? @db.Text
+
+  users User[]
+
+  @@map("roles")
+}
+
+model Branch {
+  id      String       @id @default(uuid())
+  name    String       @db.VarChar(100)
+  code    String       @db.VarChar(20)
+  address String?      @db.Text
+  status  BranchStatus @default(ACTIVE)
+
+  users User[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("branches")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String  @db.VarChar(100)
+  email    String  @unique @db.VarChar(150)
+  phone    String? @unique @db.VarChar(20)
+  password String  @db.VarChar(255)
+
+  roleId   String @map("role_id")
+  branchId String @map("branch_id")
+
+  status UserStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  role   Role   @relation(fields: [roleId], references: [id])
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  @@map("users")
+}
