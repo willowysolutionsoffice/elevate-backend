@@ -9,6 +9,7 @@ import { errorHandler } from "./middlewares/error-handler.middleware";
 import testDBRoutes from "./routes/testdb.route";
 import authRoute from "./routes/auth.route";
 import branchRoute from "./routes/branch.route";
+import userRoute from "./routes/user.route";
 
 import roleRoute from "./routes/role.route";
 import permissionRoute from "./routes/permission.route";
@@ -27,6 +28,7 @@ app.use(rateLimiter);
 app.use("/api/testdb", testDBRoutes);
 app.use("/api/auth", authRoute);
 app.use("/api/branch", branchRoute);
+app.use("/api/user", userRoute);
 
 app.use("/api/role", roleRoute);
 app.use("/api/permission", permissionRoute);
