@@ -70,6 +70,10 @@ model User {
   role   Role   @relation(fields: [roleId], references: [id])
   branch Branch @relation(fields: [branchId], references: [id])
 
+  leadsCreated    Lead[]     @relation("LeadCreator")
+  leadsAssigned   Lead[]     @relation("LeadAssignee")
+  proposalsCreated Proposal[]
+
   @@map("users")
 }
 
@@ -92,4 +96,70 @@ model RolePermission {
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@map("role_permissions")
+}
+
+model Lead {
+  id            String   @id @default(uuid())
+  clientName    String   @map("client_name") @db.VarChar(150)
+  contactPerson String?  @map("contact_person") @db.VarChar(100)
+  phone         String?  @db.VarChar(20)
+  email         String?  @db.VarChar(150)
+  location      String?  @db.Text
+  serviceCategory String? @map("service_category") // calibration/repair/etc
+  visitDate     DateTime? @map("visit_date") @db.Date
+  status        String?  // new/assigned/followup/closed - Keeping as string for now or should be enum? User said enum but simple string is safer if enum not defined. Sticking to user requested enum logic but as string for simplicity unless specifically asked for enum type
+  
+  createdBy     String?   @map("created_by")
+  assignedTo    String?   @map("assigned_to")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  creator       User?     @relation("LeadCreator", fields: [createdBy], references: [id])
+  assignee      User?     @relation("LeadAssignee", fields: [assignedTo], references: [id])
+  proposals     Proposal[]
+
+  @@map("leads")
+}
+
+model Proposal {
+  id            String   @id @default(uuid())
+  leadId        String?  @map("lead_id")   // OPTIONAL
+  proposalNo    String   @unique @map("proposal_no")
+  clientName    String   @map("client_name") @db.VarChar(150)
+  clientEmail   String?  @map("client_email") @db.VarChar(150)
+  clientPhone   String?  @map("client_phone") @db.VarChar(20)
+
+  status        ProposalStatus @default(DRAFT)
+  totalAmount   Decimal  @default(0) @map("total_amount")
+
+  items         ProposalItem[]
+  
+  createdById   String   @map("created_by_id")
+  createdBy     User     @relation(fields: [createdById], references: [id])
+  
+  lead          Lead?    @relation(fields: [leadId], references: [id])
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("proposals")
+}
+
+enum ProposalStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model ProposalItem {
+  id          String   @id @default(uuid())
+  proposalId  String   @map("proposal_id")
+  description String
+  quantity    Int
+  unitPrice   Decimal  @map("unit_price")
+  total       Decimal
+
+  proposal    Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  @@map("proposal_items")
 }

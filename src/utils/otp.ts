@@ -1,9 +1,9 @@
-export type OTPRecord = {
+export type OTPRecord<T = unknown> = {
   code: string;
   expiresAt: Date;
   attempts: number;
   verified?: boolean;
-  payload?: any;
+  payload?: T;
   type?: "register" | "forgot-password";
 };
 

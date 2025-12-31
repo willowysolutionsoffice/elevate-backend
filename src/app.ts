@@ -30,9 +30,12 @@ app.use("/api/auth", authRoute);
 app.use("/api/branch", branchRoute);
 app.use("/api/user", userRoute);
 
+import proposalRoute from "./routes/proposal.route";
+
 app.use("/api/role", roleRoute);
 app.use("/api/permission", permissionRoute);
 app.use("/api/role-permission", rolePermissionRoute);
+app.use("/api/proposals", proposalRoute);
 
 
 app.get("/api/ping", (_req, res) => {

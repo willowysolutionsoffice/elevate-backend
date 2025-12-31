@@ -48,7 +48,7 @@ export const assignPermissionsToRole = asyncHandler(
       },
     });
 
-    const existingPermissionIds = new Set(existingAssignments.map((rp: any) => rp.permissionId));
+    const existingPermissionIds = new Set(existingAssignments.map((rp) => rp.permissionId));
     const newPermissionIds = foundIds.filter((id) => !existingPermissionIds.has(id));
 
     if (newPermissionIds.length > 0) {
@@ -116,7 +116,7 @@ export const getRolePermissions = asyncHandler(
       },
     });
 
-    const permissions = rolePermissions.map((rp: any) => rp.permission);
+    const permissions = rolePermissions.map((rp) => rp.permission);
 
     res.status(200).json({
       success: true,

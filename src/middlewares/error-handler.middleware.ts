@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import CustomError from "../utils/Custom-error";
+import { ZodError } from "zod";
 
 export const errorHandler = (
   err: unknown,
@@ -15,10 +16,27 @@ export const errorHandler = (
     });
   }
 
+  // Handle Zod Validation Errors
+  if (err instanceof ZodError) {
+    const formattedErrors = err.issues.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+    }));
+    return res.status(400).json({
+      success: false,
+      message: "Validation Error",
+      errors: formattedErrors,
+    });
+  }
+
+  // Handle default errors
   console.error(err);
 
-  return res.status(500).json({
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  const message = err instanceof Error ? err.message : "Internal server error";
+
+  return res.status(statusCode).json({
     success: false,
-    message: "Internal server error",
+    message,
   });
 };
