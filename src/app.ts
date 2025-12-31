@@ -9,7 +9,10 @@ import { errorHandler } from "./middlewares/error-handler.middleware";
 import testDBRoutes from "./routes/testdb.route";
 import authRoute from "./routes/auth.route";
 import branchRoute from "./routes/branch.route";
+
 import roleRoute from "./routes/role.route";
+import permissionRoute from "./routes/permission.route";
+import rolePermissionRoute from "./routes/role-permission.route";
 
 const app = express();
 
@@ -24,7 +27,10 @@ app.use(rateLimiter);
 app.use("/api/testdb", testDBRoutes);
 app.use("/api/auth", authRoute);
 app.use("/api/branch", branchRoute);
+
 app.use("/api/role", roleRoute);
+app.use("/api/permission", permissionRoute);
+app.use("/api/role-permission", rolePermissionRoute);
 
 
 app.get("/api/ping", (_req, res) => {

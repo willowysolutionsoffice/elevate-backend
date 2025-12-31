@@ -4,6 +4,6 @@ import { authenticate } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.post("/", authenticate("admin"), createBranch);
+router.post("/",  createBranch);
 
 export default router;

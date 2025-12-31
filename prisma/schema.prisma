@@ -33,6 +33,7 @@ model Role {
   description String? @db.Text
 
   users User[]
+  rolePermissions RolePermission[]
 
   @@map("roles")
 }
@@ -70,4 +71,25 @@ model User {
   branch Branch @relation(fields: [branchId], references: [id])
 
   @@map("users")
+}
+
+model Permission {
+  id     String @id @default(uuid())
+  module String @db.VarChar(50)
+  action String @db.VarChar(20)
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@map("role_permissions")
 }
