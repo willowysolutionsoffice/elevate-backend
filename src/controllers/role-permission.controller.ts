@@ -1,23 +1,32 @@
 import { Response, Request } from "express";
 import { AuthenticatedRequest } from "../type/auth.type";
-import {prisma} from "../lib/prisma";
+import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middlewares/async-handler.middleware";
 import CustomError from "../utils/Custom-error";
 import { PERMISSION_MODULES, PERMISSION_ACTIONS } from "../constants/permissions";
+import {
+  assignPermissionsToRoleSchema,
+  removePermissionsFromRoleSchema
+} from "../validator/role-permission.schema";
+import { z } from "zod";
+
+type AssignPermissionsToRoleInput = z.infer<typeof assignPermissionsToRoleSchema>;
+type RemovePermissionsFromRoleInput = z.infer<typeof removePermissionsFromRoleSchema>;
 
 export const assignPermissionsToRole = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { roleId } = req.params;
-    const { permissionIds } = req.body;
-
-    if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
-      throw new CustomError("permissionIds array is required", 400);
+    // Validate and parse body
+    let parsed: AssignPermissionsToRoleInput;
+    try {
+      parsed = assignPermissionsToRoleSchema.parse(req.body);
+    } catch (err: any) {
+      throw new CustomError(err.errors?.[0]?.message || "Invalid input", 400);
     }
+    const { roleId, permissionIds } = parsed;
 
     const role = await prisma.role.findUnique({
       where: { id: roleId },
     });
-
     if (!role) {
       throw new CustomError("Role not found", 404);
     }
@@ -61,12 +70,14 @@ export const assignPermissionsToRole = asyncHandler(
 
 export const removePermissionsFromRole = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { roleId } = req.params;
-    const { permissionIds } = req.body; // Expecting [permissionId]
-
-    if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
-      throw new CustomError("permissionIds array is required", 400);
+    // Validate and parse body
+    let parsed: RemovePermissionsFromRoleInput;
+    try {
+      parsed = removePermissionsFromRoleSchema.parse(req.body);
+    } catch (err: any) {
+      throw new CustomError(err.errors?.[0]?.message || "Invalid input", 400);
     }
+    const { roleId, permissionIds } = parsed;
 
     // Validate all permissionIds exist
     const foundPermissions = await prisma.permission.findMany({

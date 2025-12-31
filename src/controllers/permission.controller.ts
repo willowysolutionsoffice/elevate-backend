@@ -122,3 +122,51 @@ export const deletePermission = asyncHandler(
     });
   }
 );
+
+// Bulk create permissions
+export const bulkCreatePermissions = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const permissions = req.body.permissions;
+    if (!Array.isArray(permissions) || permissions.length === 0) {
+      throw new CustomError("Permissions array is required", 400);
+    }
+
+    // Validate all items
+    const invalid = permissions.filter(
+      (p) => !p.module || !p.action
+    );
+    if (invalid.length > 0) {
+      throw new CustomError("Each permission must have module and action", 400);
+    }
+
+    // Find existing permissions
+    const existing = await prisma.permission.findMany({
+      where: {
+        OR: permissions.map((p) => ({ module: p.module, action: p.action }))
+      }
+    });
+    const existingSet = new Set(existing.map((e) => `${e.module}:${e.action}`));
+
+    // Filter out duplicates
+    const toCreate = permissions.filter(
+      (p) => !existingSet.has(`${p.module}:${p.action}`)
+    );
+
+    // Bulk create
+    let createdCount = 0;
+    if (toCreate.length > 0) {
+      const batchPayload = await prisma.permission.createMany({
+        data: toCreate,
+        skipDuplicates: true
+      });
+      createdCount = batchPayload.count;
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `${createdCount} permissions created, ${existing.length} already existed`,
+      created: toCreate,
+      skipped: existing.map((e) => ({ module: e.module, action: e.action }))
+    });
+  }
+);
