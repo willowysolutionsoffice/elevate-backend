@@ -10,19 +10,21 @@ import {
 } from "../validator/role-permission.schema";
 import { z } from "zod";
 
-type AssignPermissionsToRoleInput = z.infer<typeof assignPermissionsToRoleSchema>;
-type RemovePermissionsFromRoleInput = z.infer<typeof removePermissionsFromRoleSchema>;
 
 export const assignPermissionsToRole = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    // Validate and parse body
-    let parsed: AssignPermissionsToRoleInput;
-    try {
-      parsed = assignPermissionsToRoleSchema.parse(req.body);
-    } catch (err: any) {
-      throw new CustomError(err.errors?.[0]?.message || "Invalid input", 400);
+
+    const parsed = assignPermissionsToRoleSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      throw new CustomError(
+        "Validation failed",
+        400,
+        parsed.error.flatten().fieldErrors
+      );
     }
-    const { roleId, permissionIds } = parsed;
+
+    const { roleId, permissionIds } = parsed.data;
 
     const role = await prisma.role.findUnique({
       where: { id: roleId },
@@ -70,14 +72,17 @@ export const assignPermissionsToRole = asyncHandler(
 
 export const removePermissionsFromRole = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    // Validate and parse body
-    let parsed: RemovePermissionsFromRoleInput;
-    try {
-      parsed = removePermissionsFromRoleSchema.parse(req.body);
-    } catch (err: any) {
-      throw new CustomError(err.errors?.[0]?.message || "Invalid input", 400);
+
+    const parsed = removePermissionsFromRoleSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      throw new CustomError(
+        "Validation failed",
+        400,
+        parsed.error.flatten().fieldErrors
+      );
     }
-    const { roleId, permissionIds } = parsed;
+    const { roleId, permissionIds } = parsed.data;
 
     // Validate all permissionIds exist
     const foundPermissions = await prisma.permission.findMany({
@@ -122,8 +127,3 @@ export const getRolePermissions = asyncHandler(
   }
 );
 
-export const getAllPermissionModulesAndActions = (req: Request, res: Response) => {
-  const modules = Object.values(PERMISSION_MODULES);
-  const actions = Object.values(PERMISSION_ACTIONS);
-  res.json({ modules, actions });
-};

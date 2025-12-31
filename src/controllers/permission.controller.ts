@@ -41,18 +41,30 @@ export const createPermission = asyncHandler(
 export const getAllPermissions = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const permissions = await prisma.permission.findMany({
-      orderBy: {
-        module: "asc",
-      },
+      orderBy: [{ module: "asc" }, { action: "asc" }],
     });
+
+    const matrix = permissions.reduce<Record<string, Record<string, string>>>(
+      (acc, permission) => {
+        if (!acc[permission.module]) {
+          acc[permission.module] = {};
+        }
+
+        acc[permission.module][permission.action] = permission.id;
+
+        return acc;
+      },
+      {}
+    );
 
     res.status(200).json({
       success: true,
       message: "Permissions fetched successfully",
-      data: permissions,
+      data: matrix,
     });
   }
 );
+
 
 export const updatePermission = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -123,7 +135,6 @@ export const deletePermission = asyncHandler(
   }
 );
 
-// Bulk create permissions
 export const bulkCreatePermissions = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const permissions = req.body.permissions;
