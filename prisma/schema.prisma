@@ -41,7 +41,7 @@ model Role {
 model Branch {
   id      String       @id @default(uuid())
   name    String       @db.VarChar(100)
-  code    String       @db.VarChar(20)
+  code    String       @unique @db.VarChar(20)
   address String?      @db.Text
   status  BranchStatus @default(ACTIVE)
 
