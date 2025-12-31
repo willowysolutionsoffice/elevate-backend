@@ -3,12 +3,10 @@ import { AuthenticatedRequest } from "../type/auth.type";
 import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../middlewares/async-handler.middleware";
 import CustomError from "../utils/Custom-error";
-import { PERMISSION_MODULES, PERMISSION_ACTIONS } from "../constants/permissions";
 import {
   assignPermissionsToRoleSchema,
   removePermissionsFromRoleSchema
 } from "../validator/role-permission.schema";
-import { z } from "zod";
 
 
 export const assignPermissionsToRole = asyncHandler(

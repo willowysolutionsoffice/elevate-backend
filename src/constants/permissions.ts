@@ -3,6 +3,7 @@ export const PERMISSION_MODULES = {
   BRANCH: "Branch",
   USER: "User",
   PERMISSION: "Permission",
+  PROPOSAL: "Proposal",
 } as const;
 
 export const PERMISSION_ACTIONS = {
