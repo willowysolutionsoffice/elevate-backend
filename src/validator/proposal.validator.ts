@@ -13,6 +13,7 @@ export const createProposalSchema = z.object({
   clientName: z.string().min(1, "Client name is required"),
   clientEmail: z.string().email().optional().or(z.literal("")),
   clientPhone: z.string().optional(),
+  createdByUser: z.string().optional(),
   items: z.array(createProposalItemSchema).optional(),
 });
 

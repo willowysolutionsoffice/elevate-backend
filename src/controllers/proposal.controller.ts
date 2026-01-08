@@ -21,25 +21,43 @@ export const createProposal = asyncHandler(async (req: AuthenticatedRequest, res
   const data = createProposalSchema.parse(req.body);
   const userId = req.userId;
 
-  if (!userId) {
-    res.status(401);
-    throw new Error("User not authenticated");
+  let createdById: string | undefined = undefined;
+  let createdByUser = data.createdByUser;
+
+  if (userId) {
+     const user = await prisma.user.findUnique({ where: { id: userId } });
+     if (user) {
+         createdById = user.id;
+         if (!createdByUser) {
+             createdByUser = user.name;
+         }
+     }
+  }
+
+  if (!createdById && !createdByUser) {
+      res.status(400);
+      throw new Error("Creator information missing. Provide 'createdByUser' or use a valid internal user token.");
   }
 
   let clientName = data.clientName;
   let clientEmail = data.clientEmail;
   let clientPhone = data.clientPhone;
 
-  // Auto-fill from Lead if provided
   if (data.leadId) {
     const lead = await prisma.lead.findUnique({
       where: { id: data.leadId },
     });
     if (lead) {
-      clientName = lead.clientName;
-      clientEmail = lead.email || clientEmail;
-      clientPhone = lead.phone || clientPhone;
+      if (!clientName) clientName = lead.clientName;
+      if (!clientEmail) clientEmail = lead.email || undefined; // Handle potential nulls
+      if (!clientPhone) clientPhone = lead.phone || undefined;
     }
+  }
+  
+  // Final validation for required Client Name (schema handles it, but double check logic)
+  if (!clientName) {
+      res.status(400);  
+      throw new Error("Client Name is required (either from body or linked Lead).");
   }
 
   // Generate Proposal No
@@ -64,14 +82,15 @@ export const createProposal = asyncHandler(async (req: AuthenticatedRequest, res
 
   const proposal = await prisma.proposal.create({
     data: {
-      leadId: data.leadId,
+      leadId: data.leadId || undefined, // undefined skips the relation if null/empty
       proposalNo,
-      clientName,
+      clientName: clientName!,
       clientEmail,
       clientPhone,
       status: ProposalStatus.DRAFT,
       totalAmount: totalAmount,
-      createdById: userId,
+      createdById: createdById,
+      createdByUser: createdByUser,
       items: {
         create: itemsToCreate,
       },

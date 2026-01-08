@@ -133,8 +133,9 @@ model Proposal {
 
   items         ProposalItem[]
   
-  createdById   String   @map("created_by_id")
-  createdBy     User     @relation(fields: [createdById], references: [id])
+  createdById   String?   @map("created_by_id")
+  createdByUser String?  @map("created_by_user")
+  createdBy     User?     @relation(fields: [createdById], references: [id])
   
   lead          Lead?    @relation(fields: [leadId], references: [id])
 

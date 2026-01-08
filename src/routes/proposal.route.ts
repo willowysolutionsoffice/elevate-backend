@@ -11,67 +11,67 @@ import {
   updateProposalStatus,
   deleteProposal,
 } from "../controllers/proposal.controller";
-import { authenticate } from "../middlewares/auth.middleware";
+import { authenticateSimple } from "../middlewares/auth-simple.middleware";
 
 const router = Router();
 
 router.post(
   "/",
-  authenticate({ module: "Proposal", action: "create" }),
+  authenticateSimple,
   createProposal
 );
 
 router.get(
   "/",
-  authenticate({ module: "Proposal", action: "view" }),
+  authenticateSimple,
   getProposals
 );
 
 router.get(
   "/:id",
-  authenticate({ module: "Proposal", action: "view" }),
+  authenticateSimple,
   getProposalById
 );
 
 router.get(
   "/:id/pdf",
-  authenticate({ module: "Proposal", action: "view" }),
+  authenticateSimple,
   generateProposalPdf
 );
 
 router.put(
   "/:id",
-  authenticate({ module: "Proposal", action: "update" }),
+  authenticateSimple,
   updateProposal
 );
 
 router.post(
   "/:id/items",
-  authenticate({ module: "Proposal", action: "update" }),
+  authenticateSimple,
   addProposalItem
 );
 
 router.put(
   "/items/:itemId",
-  authenticate({ module: "Proposal", action: "update" }),
+  authenticateSimple,
   updateProposalItem
 );
 
 router.delete(
   "/items/:itemId",
-  authenticate({ module: "Proposal", action: "update" }),
+  authenticateSimple,
   deleteProposalItem
 );
 
 router.patch(
   "/:id/status",
-  authenticate({ module: "Proposal", action: "update" }),
+  authenticateSimple,
   updateProposalStatus
 );
 
 router.delete(
   "/:id",
-  authenticate({ module: "Proposal", action: "delete" }),
+  authenticateSimple,
   deleteProposal
 );
 
