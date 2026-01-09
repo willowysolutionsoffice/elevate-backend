@@ -61,8 +61,32 @@ export const createProposal = asyncHandler(async (req: AuthenticatedRequest, res
   }
 
   // Generate Proposal No
-  const count = await prisma.proposal.count();
-  const proposalNo = `PROP-${new Date().getFullYear()}-${(count + 1)
+  const currentYear = new Date().getFullYear();
+  const lastProposal = await prisma.proposal.findFirst({
+    where: {
+      proposalNo: {
+        startsWith: `PROP-${currentYear}-`,
+      },
+      // Ensure we only look at proposals that match the pattern to avoid issues if format changes
+    },
+    orderBy: {
+      proposalNo: "desc",
+    },
+  });
+
+  let nextNumber = 1;
+  if (lastProposal && lastProposal.proposalNo) {
+    const parts = lastProposal.proposalNo.split("-");
+    // Format is PROP-YYYY-NNNN. The number is the 3rd part (index 2)
+    if (parts.length === 3) {
+      const lastSequence = parseInt(parts[2], 10);
+      if (!isNaN(lastSequence)) {
+        nextNumber = lastSequence + 1;
+      }
+    }
+  }
+
+  const proposalNo = `PROP-${currentYear}-${nextNumber
     .toString()
     .padStart(4, "0")}`;
 
