@@ -12,9 +12,5 @@ if (!secret) {
   process.exit(1);
 }
 
-// Generate token with empty payload
-// The user explicitly requested no payload
 const token = jwt.sign({}, secret);
 
-console.log("Generated JWT Token:");
-console.log(token);

@@ -6,6 +6,7 @@ import { corsOptions } from "./config/cors.config";
 import { rateLimiter } from "./middlewares/rate-limit.middlware";
 import { notFoundHandler } from "./middlewares/not-found.middleware";
 import { errorHandler } from "./middlewares/error-handler.middleware";
+import morganMiddleware from "./middlewares/http-logger.middleware";
 import testDBRoutes from "./routes/testdb.route";
 import authRoute from "./routes/auth.route";
 import branchRoute from "./routes/branch.route";
@@ -17,6 +18,7 @@ import rolePermissionRoute from "./routes/role-permission.route";
 
 const app = express();
 
+app.use(morganMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

@@ -2,16 +2,18 @@ import "dotenv/config";
 import app from "./app";
 import { env } from "./config/env.config";
 import { prisma } from "./lib/prisma";
+import logger from "./utils/logger";
 
 async function startServer() {
   try {
-    console.log("Database connected");
+    logger.info("Database connected");
 
     app.listen(env.PORT, () => {
-      console.log(`Server running on port ${env.PORT}`);
+      logger.info(`Server running on port ${env.PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server", error);
+    logger.error("Failed to start server");
+    logger.error(error);
     process.exit(1);
   }
 }
@@ -19,7 +21,7 @@ async function startServer() {
 startServer();
 
 const shutdown = async () => {
-  console.log("Shutting down...");
+  logger.info("Shutting down...");
   await prisma.$disconnect();
   process.exit(0);
 };

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import CustomError from "../utils/Custom-error";
+import logger from "../utils/logger";
 import { ZodError } from "zod";
 
 export const errorHandler = (
@@ -30,7 +31,7 @@ export const errorHandler = (
   }
 
   // Handle default errors
-  console.error(err);
+  logger.error(err);
 
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   const message = err instanceof Error ? err.message : "Internal server error";
