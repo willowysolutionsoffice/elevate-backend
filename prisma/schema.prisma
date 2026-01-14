@@ -127,6 +127,7 @@ model Proposal {
   clientName    String   @map("client_name") @db.VarChar(150)
   clientEmail   String?  @map("client_email") @db.VarChar(150)
   clientPhone   String?  @map("client_phone") @db.VarChar(20)
+  branchId      String?
 
   status        ProposalStatus @default(DRAFT)
   totalAmount   Decimal  @default(0) @map("total_amount")

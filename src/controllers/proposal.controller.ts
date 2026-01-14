@@ -21,6 +21,8 @@ export const createProposal = asyncHandler(async (req: AuthenticatedRequest, res
   const data = createProposalSchema.parse(req.body);
   const userId = req.userId;
 
+    console.log("proposal",data)
+
   let createdById: string | undefined = undefined;
   let createdByUser = data.createdByUser;
 
@@ -106,11 +108,12 @@ export const createProposal = asyncHandler(async (req: AuthenticatedRequest, res
 
   const proposal = await prisma.proposal.create({
     data: {
-      leadId: data.leadId || undefined, // undefined skips the relation if null/empty
+      leadId: data.leadId || undefined, 
       proposalNo,
       clientName: clientName!,
       clientEmail,
       clientPhone,
+      branchId: data.branch || undefined,
       status: ProposalStatus.DRAFT,
       totalAmount: totalAmount,
       createdById: createdById,
@@ -138,6 +141,7 @@ export const getProposals = asyncHandler(async (req: Request, res: Response) => 
     },
     orderBy: { createdAt: "desc" },
   });
+  console.log("proposals",proposals)
   res.json(proposals);
 });
 
