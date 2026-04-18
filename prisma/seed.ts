@@ -20,22 +20,29 @@ async function main() {
   
   console.log('Operational data cleared.');
 
-  // Ensure Roles
-  const adminRole = await prisma.role.upsert({
-    where: { name: 'admin' },
-    update: {},
-    create: {
-      name: 'admin',
-      description: 'Administrator with full access',
-    },
+  // Find or Create Role
+  let adminRole = await prisma.role.findFirst({
+    where: { name: 'admin' }
   });
 
+  if (!adminRole) {
+    adminRole = await prisma.role.create({
+      data: {
+        name: 'admin',
+        description: 'Administrator with full access',
+      }
+    });
+  }
+
   // Ensure Branches
-  // We use a hardcoded ID to match the frontend
+  // We use a hardcoded ID to match the frontend MongoDB ID
   const mainBranchId = '69e20b42fcfd262548ec4f59';
   await prisma.branch.upsert({
     where: { id: mainBranchId },
-    update: {},
+    update: {
+      name: 'Main Branch',
+      code: 'MAIN',
+    },
     create: {
       id: mainBranchId,
       name: 'Main Branch',
@@ -46,20 +53,33 @@ async function main() {
 
   // Ensure Admin User
   const hashedPassword = await bcrypt.hash('Admin@123', 10);
-  await prisma.user.upsert({
-    where: { email: 'admin@elevate.com' },
-    update: {
-      password: hashedPassword,
-    },
-    create: {
-      id: 'admin-user-id',
-      name: 'Admin User',
-      email: 'admin@elevate.com',
-      password: hashedPassword,
-      roleId: adminRole.id,
-      branchId: mainBranchId,
-    },
+  const adminEmail = 'admin@elevate.com';
+  
+  const existingUser = await prisma.user.findUnique({
+    where: { email: adminEmail }
   });
+
+  if (existingUser) {
+    await prisma.user.update({
+      where: { email: adminEmail },
+      data: {
+        password: hashedPassword,
+        roleId: adminRole.id,
+        branchId: mainBranchId,
+      }
+    });
+  } else {
+    await prisma.user.create({
+      data: {
+        id: 'admin-user-id',
+        name: 'Admin User',
+        email: adminEmail,
+        password: hashedPassword,
+        roleId: adminRole.id,
+        branchId: mainBranchId,
+      }
+    });
+  }
 
   console.log('Backend Clean seeding completed!');
 }
